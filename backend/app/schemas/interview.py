@@ -19,7 +19,7 @@ class QuestionOut(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class SessionOut(BaseModel):
     id: int
@@ -30,4 +30,4 @@ class SessionOut(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
