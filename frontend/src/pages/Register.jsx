@@ -16,7 +16,18 @@ export default function Register({ setUser }) {
     setError('');
     setLoading(true);
     try {
-      await registerUser(form);
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Registration failed');
+      }
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.detail || 'Something went wrong');
