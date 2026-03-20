@@ -108,18 +108,16 @@ export default function Interview() {
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
-        // Tell the backend to wrap up the session
         await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/complete/${sessionId}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        // IMPORTANT: Pass the sessionId clearly in the state
-        navigate('/results', { state: { sessionId: sessionId } });
+        // Change #1: Inside Try
+        navigate(`/results?sessionId=${sessionId}`, { state: { sessionId: sessionId } });
       } catch (err) {
         console.error("Completion Error:", err);
-        // Fallback: navigate anyway so the user isn't stuck
-        navigate('/results', { state: { sessionId: sessionId } });
+        // Change #2: Inside Catch (Fallback)
+        navigate(`/results?sessionId=${sessionId}`, { state: { sessionId: sessionId } });
       } finally {
         setLoading(false);
       }
