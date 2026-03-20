@@ -17,31 +17,37 @@ export default function Results() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const sessionId = state?.sessionId;
-    
+    // 1. Get sessionId from state (from navigate) OR from the URL if refreshed
+    const queryParams = new URLSearchParams(window.location.search);
+    const sessionId = state?.sessionId || queryParams.get('sessionId');
+
     if (!sessionId) {
-      console.error("No sessionId found in navigation state");
-      navigate('/dashboard');
-      return;
+      console.error("No sessionId found");
+      // If we really don't have an ID, we can't show results
+      const timeout = setTimeout(() => navigate('/dashboard'), 3000);
+      setError("No session ID found. Redirecting to dashboard...");
+      return () => clearTimeout(timeout);
     }
 
     const fetchResults = async () => {
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/results/${sessionId}`, {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
         });
 
-        if (!response.ok) throw new Error('Failed to fetch results');
-        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}`);
+        }
+
         const data = await response.json();
         setResult(data);
       } catch (err) {
         console.error("Fetch results error:", err);
-        setError("Failed to load results. Please try again later.");
+        setError("Failed to load your interview results. The AI might still be processing them.");
       } finally {
         setLoading(false);
       }
