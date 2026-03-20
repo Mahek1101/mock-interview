@@ -104,7 +104,7 @@ export default function Interview() {
   const handleNext = async () => {
     const token = localStorage.getItem('token');
     
-    // 1. If we finished all questions, go to results
+    // 1. Check if we reached the limit
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
@@ -114,39 +114,37 @@ export default function Interview() {
         });
         navigate('/results', { state: { sessionId: sessionId } });
       } catch (err) {
-        console.error("Error completing session:", err);
+        console.error("Complete error:", err);
       } finally {
         setLoading(false);
       }
       return;
     }
 
-    // 2. Clear old data so the new question has space to load
+    // 2. Reset UI for the new question
     setLoading(true);
     setAnswer('');
     setFeedback(null);
     setPhase('answering');
 
     try {
-      // 3. Fetch the NEXT question - Using a more reliable URL structure
-      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
-        method: 'GET', // Explicitly set GET
+      // 3. The Fetch - Added a trailing slash and ensured the ID is correct
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}/?difficulty=${difficulty}&t=${Date.now()}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Accept': 'application/json'
         }
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Backend Error Detail:", errorText);
-        throw new Error('Failed to fetch next question');
+        throw new Error(`Server responded with ${response.status}`);
       }
       
       const resData = await response.json();
-      console.log("DEBUG: Next Question Response:", resData);
+      console.log("DEBUG: Next Question Received:", resData);
 
-      // Check for 'next_question' (standard for follow-ups) or 'question'
+      // 4. Map the new question text
       const nextText = resData.next_question || resData.question || resData.initial_question;
       const nextId = resData.question_id || resData.id;
 
@@ -155,11 +153,12 @@ export default function Interview() {
         setQuestion(nextText);
         setQuestionNum(prev => prev + 1);
       } else {
-        throw new Error('No question text found in response');
+        throw new Error('Response was successful but question text was missing');
       }
       
     } catch (err) {
-      console.error("Fetch Error:", err);
+      console.error("HandleNext Error:", err);
+      // If it fails, we show a more helpful message
       alert("The AI is taking a moment to generate a unique question. Please wait 5 seconds and click 'Next Question' again.");
     } finally {
       setLoading(false);
