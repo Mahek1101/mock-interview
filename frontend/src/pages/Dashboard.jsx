@@ -251,12 +251,11 @@ export default function Dashboard({ user, logout }) {
           ))}
         </div>
 
-        <button
-          className="start-btn"
-          disabled={!selected}
-          onClick={() => navigate(`/interview/${selected}?difficulty=${difficulty}`)}
+        <button 
+          className="start-btn" 
+          onClick={() => navigate(`/interview/${selectedTopic}?difficulty=${difficulty}`)}
         >
-          Start {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Interview →
+          Start Interview →
         </button>
 
         <div style={{ marginTop: '3rem' }}>
