@@ -255,7 +255,7 @@ export default function Dashboard({ user, logout }) {
           className="start-btn" 
           onClick={() => {
             if (selected) {
-              navigate("/interview/" + selected + "?difficulty=" + difficulty);
+              navigate(`/interview/${selected}?difficulty=${difficulty}`);
             } else {
               alert("Please select a topic first!");
             }
