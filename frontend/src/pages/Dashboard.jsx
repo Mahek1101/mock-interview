@@ -131,7 +131,7 @@ export default function Dashboard({ user, logout }) {
         const token = localStorage.getItem('token');
         
         // Direct call to your Render backend
-        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/history', {
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -253,7 +253,7 @@ export default function Dashboard({ user, logout }) {
 
         <button 
           className="start-btn" 
-          onClick={() => navigate(`/interview/${selectedTopic}?difficulty=${difficulty}`)}
+          onClick={() => navigate(`/interview/${topic}?difficulty=${difficulty}`)}
         >
           Start Interview →
         </button>
