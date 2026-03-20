@@ -108,22 +108,24 @@ export default function Interview() {
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
+        // Call the backend to mark it as complete
         await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/complete/${sessionId}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        // Change #1: Inside Try
+        
+        // Navigation inside try
         navigate(`/results?sessionId=${sessionId}`, { state: { sessionId: sessionId } });
       } catch (err) {
         console.error("Completion Error:", err);
-        // Change #2: Inside Catch (Fallback)
+        // Navigation inside catch (so the user isn't stuck if the API fails)
         navigate(`/results?sessionId=${sessionId}`, { state: { sessionId: sessionId } });
       } finally {
         setLoading(false);
       }
       return;
     }
-
+    
     setLoading(true);
     setAnswer('');
     setFeedback(null);
