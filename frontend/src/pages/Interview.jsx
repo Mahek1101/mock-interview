@@ -128,8 +128,8 @@ export default function Interview() {
     setPhase('answering');
 
     try {
-      // 3. Fetch the NEXT question
-      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}`, {
+      // 3. Fetch the NEXT question (Added a timestamp to prevent the 'same question' bug)
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -141,8 +141,8 @@ export default function Interview() {
       const resData = await response.json();
       console.log("DEBUG: Next Question Response:", resData);
 
-      // 4. CRITICAL: Update state with the NEW question text
-      // We check for both 'question' and 'next_question' because the backend uses both
+      // 4. Update state with the NEW question text
+      // We check next_question first because that's what the backend sends for follow-ups
       const nextText = resData.next_question || resData.question || resData.initial_question;
       const nextId = resData.question_id || resData.id;
 
@@ -156,7 +156,7 @@ export default function Interview() {
       
     } catch (err) {
       console.error("Error fetching next question:", err);
-      alert("Failed to load next question. Please try again.");
+      alert("AI is still thinking... Please wait 5 seconds and click Next again.");
     } finally {
       setLoading(false);
     }
