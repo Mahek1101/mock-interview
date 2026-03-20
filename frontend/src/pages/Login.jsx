@@ -16,13 +16,28 @@ export default function Login({ setUser }) {
     setError('');
     setLoading(true);
     try {
-      const res = await loginUser(form);
-      localStorage.setItem('token', res.data.access_token);
-      const me = await getMe();
-      setUser(me.data);
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Invalid email or password');
+      }
+
+      const resData = await response.json();
+      
+      // Save the token and user data
+      localStorage.setItem('token', resData.access_token);
+      setUser(resData.user); // Assuming your backend returns user info
+      
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid email or password');
+      setError(err.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
