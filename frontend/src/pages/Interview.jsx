@@ -128,7 +128,7 @@ export default function Interview() {
     setPhase('answering');
 
     try {
-      // 3. Fetch the NEXT question (Added a timestamp to prevent the 'same question' bug)
+      // 3. Fetch the NEXT question with a timestamp to prevent caching
       const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -141,22 +141,23 @@ export default function Interview() {
       const resData = await response.json();
       console.log("DEBUG: Next Question Response:", resData);
 
-      // 4. Update state with the NEW question text
-      // We check next_question first because that's what the backend sends for follow-ups
+      // 4. Update the state with the NEW question text
+      // We check 'next_question' (standard for follow-ups) then 'question'
       const nextText = resData.next_question || resData.question || resData.initial_question;
       const nextId = resData.question_id || resData.id;
 
       if (nextText) {
         setQuestionId(nextId);
-        setQuestion(nextText);
+        setQuestion(nextText); // This line is what actually changes the text on screen!
         setQuestionNum(prev => prev + 1);
       } else {
-        throw new Error('Question text was missing in backend response');
+        // Fallback if the AI is slow: tell the user to try one more time
+        throw new Error('Question text was missing');
       }
       
     } catch (err) {
       console.error("Error fetching next question:", err);
-      alert("AI is still thinking... Please wait 5 seconds and click Next again.");
+      alert("AI is still thinking... Please wait 3 seconds and click 'Next Question' again.");
     } finally {
       setLoading(false);
     }
