@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { startSession, submitAnswer, nextQuestion, completeSession } from '../api/interview';
+
 import './Interview.css';
 
 const MAX_QUESTIONS = 5;
@@ -101,7 +101,7 @@ export default function Interview({ user }) {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const resData = await response.json();
-        navigate('/results', { state: { result: resData.data } });
+        navigate('/results', { state: { sessionId: sessionId } });
       } catch (err) {
         console.error("Error completing session:", err);
       } finally {
