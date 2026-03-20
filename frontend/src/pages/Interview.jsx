@@ -33,7 +33,7 @@ export default function Interview() {
         setLoading(true);
         const token = localStorage.getItem('token');
         
-        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/api/interviews/start', {
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/start', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
