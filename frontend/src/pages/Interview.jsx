@@ -49,9 +49,11 @@ export default function Interview() {
         }
 
         const res = await response.json();
-        setSessionId(res.session_id);
-        setQuestionId(res.question_id);
-        setQuestion(res.question);
+        console.log("Full Backend Response:", res); // This helps us debug!
+        
+        setSessionId(res.session_id || res.id);
+        setQuestionId(res.question_id || (res.questions && res.questions[0]?.id));
+        setQuestion(res.question || res.initial_question || "Click 'Next' if question fails to load.");
         setQuestionNum(1);
       } catch (err) {
         console.error("Interview Init Error:", err);
