@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import './Results.css';
 
 const TOPIC_LABELS = {
@@ -9,11 +10,49 @@ const TOPIC_LABELS = {
 };
 
 export default function Results() {
-  const { state }  = useLocation();
-  const navigate   = useNavigate();
-  const result     = state?.result;
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!result) { navigate('/dashboard'); return null; }
+  useEffect(() => {
+    const sessionId = state?.sessionId;
+    
+    if (!sessionId) {
+      console.error("No sessionId found in navigation state");
+      navigate('/dashboard');
+      return;
+    }
+
+    const fetchResults = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/results/${sessionId}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch results');
+        
+        const data = await response.json();
+        setResult(data);
+      } catch (err) {
+        console.error("Fetch results error:", err);
+        setError("Failed to load results. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [state, navigate]);
+
+  if (loading) return <div className="loading-screen">⌛ Calculating your final score...</div>;
+  if (error) return <div className="error-screen">{error}</div>;
+  if (!result) return null;
 
   const scoreColor = (score) => {
     if (score >= 8) return '#059669';
@@ -21,22 +60,15 @@ export default function Results() {
     return '#dc2626';
   };
 
-  const scoreLabel = (score) => {
-    if (score >= 8) return 'Excellent! 🎉';
-    if (score >= 5) return 'Good job! 👍';
-    return 'Keep practicing! 💪';
-  };
-
   return (
     <div className="results-page">
       <header className="results-header">
         <h1 className="results-logo">🤖 AI Mock Interview</h1>
       </header>
-
       <main className="results-main">
         <div className="results-hero">
           <h2>Interview Complete!</h2>
-          <p>{TOPIC_LABELS[result.topic]} — {result.total_questions} questions</p>
+          <p>{TOPIC_LABELS[result.topic] || 'Interview'} — {result.total_questions} Questions</p>
         </div>
 
         <div className="final-score-card">
@@ -46,40 +78,26 @@ export default function Results() {
             </span>
             <span className="final-score-label">/10</span>
           </div>
-          <h3 className="score-verdict">{scoreLabel(result.total_score)}</h3>
-          <p className="score-desc">Average score across {result.total_questions} questions</p>
+          <p className="score-desc">Overall Performance Score</p>
         </div>
 
-        <h2 className="section-title">Question Breakdown</h2>
-
-        {result.questions?.map((q, i) => (
-          <div key={i} className="question-result-card">
-            <div className="qr-header">
-              <span className="qr-number">Q{i + 1}</span>
-              <span className="qr-score" style={{ color: scoreColor(q.score), borderColor: scoreColor(q.score) }}>
-                {q.score}/10
-              </span>
+        <h2 className="section-title">Detailed Feedback</h2>
+        <div className="feedback-container">
+          {result.questions?.map((q, i) => (
+            <div key={i} className="question-result-card">
+              <div className="qr-header">
+                <span className="qr-number">Question {i + 1}</span>
+                <span className="qr-score" style={{ color: scoreColor(q.score) }}>{q.score}/10</span>
+              </div>
+              <p className="qr-text"><strong>Q:</strong> {q.question_text}</p>
+              <p className="qr-feedback"><strong>AI Feedback:</strong> {q.feedback}</p>
             </div>
-            <p className="qr-question">{q.question}</p>
-            <div className="qr-answer">
-              <span className="qr-label">Your answer</span>
-              <p>{q.answer}</p>
-            </div>
-            <div className="qr-feedback">
-              <span className="qr-label">AI feedback</span>
-              <p>{q.feedback}</p>
-            </div>
-          </div>
-        ))}
-
-        <div className="results-actions">
-          <button className="retry-btn" onClick={() => navigate(`/interview/${result.topic}`)}>
-            Try Again
-          </button>
-          <button className="home-btn" onClick={() => navigate('/dashboard')}>
-            Back to Dashboard
-          </button>
+          ))}
         </div>
+
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
+          Back to Dashboard
+        </button>
       </main>
     </div>
   );
