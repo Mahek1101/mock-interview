@@ -76,7 +76,7 @@ export default function Interview() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/answer', {
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/answer', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +107,7 @@ export default function Interview() {
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
-        const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interviews/complete/${sessionId}`, {
+        const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/complete/${sessionId}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -127,7 +127,7 @@ export default function Interview() {
     setPhase('answering');
 
     try {
-      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interviews/next/${sessionId}?difficulty=${difficulty}`, {
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}`, {
         headers: { 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
