@@ -104,7 +104,7 @@ export default function Interview() {
   const handleNext = async () => {
     const token = localStorage.getItem('token');
     
-    // 1. Check if we reached the limit
+    // 1. Check if interview is over
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
@@ -114,52 +114,48 @@ export default function Interview() {
         });
         navigate('/results', { state: { sessionId: sessionId } });
       } catch (err) {
-        console.error("Complete error:", err);
+        console.error("Completion Error:", err);
       } finally {
         setLoading(false);
       }
       return;
     }
 
-    // 2. Reset UI for the new question
     setLoading(true);
     setAnswer('');
     setFeedback(null);
     setPhase('answering');
 
     try {
-      // 3. The Fetch - Added a trailing slash and ensured the ID is correct
-      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
-        method: 'GET',
+      // 2. MATCHING YOUR BACKEND: Use POST and send session_id in the body
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        }
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          difficulty: difficulty
+        })
       });
 
-      if (!response.ok) {
-        throw new Error(`Server responded with ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
       
       const resData = await response.json();
-      console.log("DEBUG: Next Question Received:", resData);
 
-      // 4. Map the new question text
-      const nextText = resData.next_question || resData.question || resData.initial_question;
-      const nextId = resData.question_id || resData.id;
-
-      if (nextText) {
-        setQuestionId(nextId);
-        setQuestion(nextText);
-        setQuestionNum(prev => prev + 1);
+      // 3. Update the UI with the next question
+      if (resData.question) {
+        setQuestionId(resData.question_id);
+        setQuestion(resData.question);
+        setQuestionNum(resData.question_number);
       } else {
-        throw new Error('Response was successful but question text was missing');
+        throw new Error('No question found in response');
       }
       
     } catch (err) {
-      console.error("HandleNext Error:", err);
-      // If it fails, we show a more helpful message
-      alert("The AI is taking a moment to generate a unique question. Please wait 5 seconds and click 'Next Question' again.");
+      console.error("Next Question Error:", err);
+      alert("AI is still generating your next unique question. Please wait 5 seconds and try again.");
     } finally {
       setLoading(false);
     }
