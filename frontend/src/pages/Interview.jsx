@@ -49,12 +49,16 @@ export default function Interview() {
         }
 
         const res = await response.json();
-        console.log("DEBUG: Backend Response", res);
+        console.log("DEBUG: Backend Response Data:", res);
         
-        // This ensures the page shows SOMETHING even if the backend is slow
+        // This ensures the page shows SOMETHING even if the backend is slow or the name is different
         setSessionId(res.session_id || res.id);
         setQuestionId(res.question_id || (res.questions && res.questions[0]?.id));
-        setQuestion(res.question || res.initial_question || "AI is still thinking... Please refresh the page in 10 seconds.");
+        
+        // Try every possible name the backend might use for the question
+        const incomingQuestion = res.question || res.initial_question || (res.questions && res.questions[0]?.text);
+        setQuestion(incomingQuestion || "AI is warming up... Please click 'Exit' and try one more time in 30 seconds.");
+        
         setQuestionNum(1);
       } catch (err) {
         console.error("Interview Init Error:", err);
