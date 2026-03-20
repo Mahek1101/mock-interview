@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-
 import './Interview.css';
 
 const MAX_QUESTIONS = 5;
