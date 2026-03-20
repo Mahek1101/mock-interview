@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import './Dashboard.css';
 
 const TOPICS = [
@@ -252,8 +251,15 @@ export default function Dashboard({ user, logout }) {
         </div>
 
         <button 
+          type="button" 
           className="start-btn" 
-          onClick={() => selected && navigate(`/interview/${selected}?difficulty=${difficulty}`)}
+          onClick={() => {
+            if (selected) {
+              navigate("/interview/" + selected + "?difficulty=" + difficulty);
+            } else {
+              alert("Please select a topic first!");
+            }
+          }}
         >
           Start Interview →
         </button>
