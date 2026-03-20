@@ -30,7 +30,7 @@ export default function Register({ setUser }) {
       }
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Something went wrong');
+      setError(err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
