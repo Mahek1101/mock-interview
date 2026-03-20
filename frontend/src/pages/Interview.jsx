@@ -128,36 +128,39 @@ export default function Interview() {
     setPhase('answering');
 
     try {
-      // 3. Fetch the NEXT question with a timestamp to prevent caching
+      // 3. Fetch the NEXT question - Using a more reliable URL structure
       const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
+        method: 'GET', // Explicitly set GET
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
-      if (!response.ok) throw new Error('Failed to fetch next question');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Backend Error Detail:", errorText);
+        throw new Error('Failed to fetch next question');
+      }
       
       const resData = await response.json();
       console.log("DEBUG: Next Question Response:", resData);
 
-      // 4. Update the state with the NEW question text
-      // We check 'next_question' (standard for follow-ups) then 'question'
+      // Check for 'next_question' (standard for follow-ups) or 'question'
       const nextText = resData.next_question || resData.question || resData.initial_question;
       const nextId = resData.question_id || resData.id;
 
       if (nextText) {
         setQuestionId(nextId);
-        setQuestion(nextText); // This line is what actually changes the text on screen!
+        setQuestion(nextText);
         setQuestionNum(prev => prev + 1);
       } else {
-        // Fallback if the AI is slow: tell the user to try one more time
-        throw new Error('Question text was missing');
+        throw new Error('No question text found in response');
       }
       
     } catch (err) {
-      console.error("Error fetching next question:", err);
-      alert("AI is still thinking... Please wait 3 seconds and click 'Next Question' again.");
+      console.error("Fetch Error:", err);
+      alert("The AI is taking a moment to generate a unique question. Please wait 5 seconds and click 'Next Question' again.");
     } finally {
       setLoading(false);
     }
