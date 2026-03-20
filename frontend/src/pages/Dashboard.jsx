@@ -125,10 +125,32 @@ export default function Dashboard({ user, logout }) {
   const [chartType, setChartType]   = useState('line');
 
   useEffect(() => {
-    getHistory()
-      .then(res => setHistory(res.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const fetchHistory = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        
+        // Direct call to your Render backend
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/history', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch history');
+        
+        const data = await response.json();
+        // The backend returns the list directly or inside a 'data' field
+        setHistory(Array.isArray(data) ? data : data.data || []);
+      } catch (err) {
+        console.error('Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
   }, []);
 
   const handleLogout = () => { logout(); navigate('/login'); };
