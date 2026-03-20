@@ -91,22 +91,50 @@ export default function Interview({ user }) {
   };
 
   const handleNext = async () => {
+    const token = localStorage.getItem('token');
+
     if (questionNum >= MAX_QUESTIONS) {
-      const res = await completeSession(sessionId);
-      navigate('/results', { state: { result: res.data } });
+      try {
+        setLoading(true);
+        const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interviews/complete/${sessionId}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const resData = await response.json();
+        navigate('/results', { state: { result: resData.data } });
+      } catch (err) {
+        console.error("Error completing session:", err);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
+
     setLoading(true);
     setAnswer('');
     setFeedback(null);
     setPhase('answering');
-    const res = await nextQuestion(sessionId, difficulty);
-    setQuestionId(res.data.question_id);
-    setQuestion(res.data.question);
-    setQuestionNum(questionNum + 1);
-    setLoading(false);
-  };
 
+    try {
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interviews/next/${sessionId}?difficulty=${difficulty}`, {
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch next question');
+      
+      const resData = await response.json();
+      setQuestionId(resData.question_id);
+      setQuestion(resData.question);
+      setQuestionNum(prev => prev + 1);
+    } catch (err) {
+      console.error("Error fetching next question:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const scoreColor = (score) => {
     if (score >= 8) return '#059669';
     if (score >= 5) return '#d97706';
