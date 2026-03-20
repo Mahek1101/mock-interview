@@ -142,10 +142,17 @@ export default function Interview() {
       console.log("DEBUG: Next Question Response:", resData);
 
       // 4. CRITICAL: Update state with the NEW question text
-      setQuestionId(resData.question_id);
-      // We check for both 'question' and 'next_question' just in case
-      setQuestion(resData.question || resData.next_question || "Loading next...");
-      setQuestionNum(prev => prev + 1);
+      // We check for both 'question' and 'next_question' because the backend uses both
+      const nextText = resData.next_question || resData.question || resData.initial_question;
+      const nextId = resData.question_id || resData.id;
+
+      if (nextText) {
+        setQuestionId(nextId);
+        setQuestion(nextText);
+        setQuestionNum(prev => prev + 1);
+      } else {
+        throw new Error('Question text was missing in backend response');
+      }
       
     } catch (err) {
       console.error("Error fetching next question:", err);
