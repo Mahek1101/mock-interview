@@ -103,15 +103,15 @@ export default function Interview() {
 
   const handleNext = async () => {
     const token = localStorage.getItem('token');
-
+    
+    // 1. If we finished all questions, go to results
     if (questionNum >= MAX_QUESTIONS) {
       try {
         setLoading(true);
-        const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/complete/${sessionId}`, {
+        await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/complete/${sessionId}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        const resData = await response.json();
         navigate('/results', { state: { sessionId: sessionId } });
       } catch (err) {
         console.error("Error completing session:", err);
@@ -121,31 +121,40 @@ export default function Interview() {
       return;
     }
 
+    // 2. Clear old data so the new question has space to load
     setLoading(true);
     setAnswer('');
     setFeedback(null);
     setPhase('answering');
 
     try {
+      // 3. Fetch the NEXT question
       const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}`, {
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (!response.ok) throw new Error('Failed to fetch next question');
       
       const resData = await response.json();
+      console.log("DEBUG: Next Question Response:", resData);
+
+      // 4. CRITICAL: Update state with the NEW question text
       setQuestionId(resData.question_id);
-      setQuestion(resData.question);
+      // We check for both 'question' and 'next_question' just in case
+      setQuestion(resData.question || resData.next_question || "Loading next...");
       setQuestionNum(prev => prev + 1);
+      
     } catch (err) {
       console.error("Error fetching next question:", err);
+      alert("Failed to load next question. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+  
   const scoreColor = (score) => {
     if (score >= 8) return '#059669';
     if (score >= 5) return '#d97706';
