@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getHistory } from '../api/interview';
+
 import './Dashboard.css';
 
 const TOPICS = [
@@ -131,7 +131,7 @@ export default function Dashboard({ user, logout }) {
         const token = localStorage.getItem('token');
         
         // Direct call to your Render backend
-        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/', {
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -253,7 +253,7 @@ export default function Dashboard({ user, logout }) {
 
         <button 
           className="start-btn" 
-          onClick={() => navigate(`/interview/${topic}?difficulty=${difficulty}`)}
+          onClick={() => selected && navigate(`/interview/${selected}?difficulty=${difficulty}`)}
         >
           Start Interview →
         </button>
