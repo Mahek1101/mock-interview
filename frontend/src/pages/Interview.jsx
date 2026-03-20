@@ -129,7 +129,7 @@ export default function Interview() {
 
     try {
       // 3. The Fetch - Added a trailing slash and ensured the ID is correct
-      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}/?difficulty=${difficulty}&t=${Date.now()}`, {
+      const response = await fetch(`https://mock-interview-backend-d0i9.onrender.com/interview/next/${sessionId}?difficulty=${difficulty}&t=${Date.now()}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
