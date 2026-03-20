@@ -11,27 +11,28 @@ const TOPIC_LABELS = {
 
 const DIFF_COLORS = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
 
-export default function Interview({ user }) {
-  const { topic }           = useParams();
-  const [searchParams]      = useSearchParams();
-  const difficulty          = searchParams.get('difficulty') || 'medium';
-  const navigate            = useNavigate();
+export default function Interview() {
+  const { topic } = useParams();
+  const [searchParams] = useSearchParams();
+  const difficulty = searchParams.get('difficulty') || 'medium';
+  const navigate = useNavigate();
 
-  const [sessionId, setSessionId]     = useState(null);
-  const [questionId, setQuestionId]   = useState(null);
-  const [question, setQuestion]       = useState('');
+  const [sessionId, setSessionId] = useState(null);
+  const [questionId, setQuestionId] = useState(null);
+  const [question, setQuestion] = useState('');
   const [questionNum, setQuestionNum] = useState(1);
-  const [answer, setAnswer]           = useState('');
-  const [feedback, setFeedback]       = useState(null);
-  const [loading, setLoading]         = useState(true);
-  const [submitting, setSubmitting]   = useState(false);
-  const [phase, setPhase]             = useState('answering');
+  const [answer, setAnswer] = useState('');
+  const [feedback, setFeedback] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [phase, setPhase] = useState('answering');
 
   useEffect(() => {
     const initSession = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
+        
         const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/start', {
           method: 'POST',
           headers: {
@@ -41,16 +42,20 @@ export default function Interview({ user }) {
           body: JSON.stringify({ topic, difficulty })
         });
 
-        if (!response.ok) throw new Error('Failed to start session');
-        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Backend Error:", errorData);
+          throw new Error('Failed to start session');
+        }
+
         const res = await response.json();
         setSessionId(res.session_id);
         setQuestionId(res.question_id);
         setQuestion(res.question);
         setQuestionNum(1);
       } catch (err) {
-        console.error(err);
-        navigate('/dashboard');
+        console.error("Interview Init Error:", err);
+        // We removed the navigate to dashboard so the page doesn't bounce!
       } finally {
         setLoading(false);
       }
@@ -58,7 +63,7 @@ export default function Interview({ user }) {
 
     if (topic) initSession();
   }, [topic, difficulty, navigate]);
-
+  
   const handleSubmit = async () => {
     if (!answer.trim()) return;
     setSubmitting(true);
