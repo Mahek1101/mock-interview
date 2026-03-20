@@ -24,17 +24,23 @@ export default function Login({ setUser }) {
         body: JSON.stringify(form),
       });
 
+      const resData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Invalid email or password');
+        throw new Error(resData.detail || 'Invalid email or password');
       }
 
-      const resData = await response.json();
+      // 1. Store the token
+      if (resData.access_token) {
+        localStorage.setItem('token', resData.access_token);
+      }
       
-      // Save the token and user data
-      localStorage.setItem('token', resData.access_token);
-      setUser(resData.user); // Assuming your backend returns user info
-      
+      // 2. Update the user state
+      if (setUser) {
+        setUser(resData.user || { email: form.email });
+      }
+
+      // 3. Move to dashboard
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Invalid email or password');
