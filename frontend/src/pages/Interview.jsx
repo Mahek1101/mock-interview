@@ -29,26 +29,65 @@ export default function Interview({ user }) {
   const [phase, setPhase]             = useState('answering');
 
   useEffect(() => {
-    startSession(topic, difficulty)
-      .then(res => {
-        setSessionId(res.data.session_id);
-        setQuestionId(res.data.question_id);
-        setQuestion(res.data.question);
+    const initSession = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem('token');
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/start', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ topic, difficulty })
+        });
+
+        if (!response.ok) throw new Error('Failed to start session');
+        
+        const res = await response.json();
+        setSessionId(res.session_id);
+        setQuestionId(res.question_id);
+        setQuestion(res.question);
         setQuestionNum(1);
+      } catch (err) {
+        console.error(err);
+        navigate('/dashboard');
+      } finally {
         setLoading(false);
-      })
-      .catch(() => navigate('/dashboard'));
-  }, [topic]);
+      }
+    };
+
+    if (topic) initSession();
+  }, [topic, difficulty, navigate]);
 
   const handleSubmit = async () => {
     if (!answer.trim()) return;
     setSubmitting(true);
     try {
-      const res = await submitAnswer({ session_id: sessionId, question_id: questionId, answer });
-      setFeedback(res.data);
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews/answer', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          question_id: questionId,
+          answer: answer
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to submit answer');
+      
+      const resData = await response.json();
+      setFeedback(resData);
       setPhase('feedback');
-    } catch (err) { console.error(err); }
-    finally { setSubmitting(false); }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleNext = async () => {
