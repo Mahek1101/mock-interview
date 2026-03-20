@@ -49,11 +49,12 @@ export default function Interview() {
         }
 
         const res = await response.json();
-        console.log("Full Backend Response:", res); // This helps us debug!
+        console.log("DEBUG: Backend Response", res);
         
+        // This ensures the page shows SOMETHING even if the backend is slow
         setSessionId(res.session_id || res.id);
         setQuestionId(res.question_id || (res.questions && res.questions[0]?.id));
-        setQuestion(res.question || res.initial_question || "Click 'Next' if question fails to load.");
+        setQuestion(res.question || res.initial_question || "AI is still thinking... Please refresh the page in 10 seconds.");
         setQuestionNum(1);
       } catch (err) {
         console.error("Interview Init Error:", err);
