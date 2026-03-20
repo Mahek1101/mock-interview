@@ -121,37 +121,38 @@ def next_question(
     }
 
 @router.post("/complete/{session_id}")
-def complete_session(
-    session_id: int,
-    db: DBSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    session = db.query(Session).filter(
-        Session.id == session_id,
-        Session.user_id == current_user.id
-    ).first()
+def complete_session(session_id: int, db: DBSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    session = db.query(Session).filter(Session.id == session_id, Session.user_id == current_user.id).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
     session.status = "completed"
-    db.commit()
+    
+    # 1. Fetch all answered questions
+    questions = db.query(Question).filter(Question.session_id == session_id, Question.answer != "").all()
+    
+    # 2. Calculate the score right here to avoid "NoneType" errors
+    if questions:
+        avg_score = sum(q.score for q in questions if q.score is not None) / len(questions)
+    else:
+        avg_score = 0
 
-    questions = db.query(Question).filter(
-        Question.session_id == session_id,
-        Question.answer != ""
-    ).all()
+    session.total_score = avg_score
+    db.commit()
 
     return {
         "session_id": session.id,
         "topic": session.topic,
-        "total_score": round(session.total_score, 1),
-        "total_questions": session.total_questions,
-        "questions": [{
-            "question": q.question,
-            "answer": q.answer,
-            "feedback": q.feedback,
-            "score": q.score
-        } for q in questions]
+        "total_score": round(avg_score, 1), # Uses the freshly calculated score
+        "total_questions": len(questions),
+        "questions": [
+            {
+                "question": q.question,
+                "answer": q.answer,
+                "feedback": q.feedback,
+                "score": q.score
+            } for q in questions
+        ]
     }
 
 @router.get("/history")
@@ -171,3 +172,25 @@ def get_history(
         "total_questions": s.total_questions,
         "created_at": s.created_at
     } for s in sessions]
+
+@router.get("/results/{session_id}")
+def get_session_results(session_id: int, db: DBSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    session = db.query(Session).filter(Session.id == session_id, Session.user_id == current_user.id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    questions = db.query(Question).filter(Question.session_id == session_id).all()
+    
+    return {
+        "topic": session.topic,
+        "total_score": round(session.total_score or 0, 1),
+        "total_questions": len(questions),
+        "questions": [
+            {
+                "question": q.question,
+                "answer": q.answer,
+                "feedback": q.feedback,
+                "score": q.score
+            } for q in questions
+        ]
+    }
