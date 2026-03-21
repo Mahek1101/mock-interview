@@ -287,6 +287,12 @@ export default function Dashboard({ user, logout }) {
               <span className="score-badge" style={{ background: `${scoreColor(session.total_score)}15`, color: scoreColor(session.total_score) }}>
                 {session.total_score}/10
               </span>
+              <button 
+                className="view-results-btn"
+                onClick={() => navigate(`/results?sessionId=${session.id}`, { state: { sessionId: session.id } })}
+              >
+                View Details
+              </button>
             </div>
           ))}
         </div>
