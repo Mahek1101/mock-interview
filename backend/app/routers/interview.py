@@ -222,3 +222,14 @@ def get_admin_data(db: DBSession = Depends(get_db), current_user: User = Depends
             } for q in all_answers
         ]
     }
+
+@router.get("/admin/stats")
+def get_admin_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Security check: only you!
+    if current_user.email.lower() != "mahek@gmail.com":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    return {
+        "total_users": db.query(User).count(),
+        "total_interviews": db.query(Session).count()
+    }
