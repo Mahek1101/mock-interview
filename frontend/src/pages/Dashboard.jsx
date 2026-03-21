@@ -148,7 +148,7 @@ export default function Dashboard({ user, logout }) {
     // --- NEW ADMIN FETCH LOGIC ---
     const fetchAdminStats = async () => {
       // ⚠️ CHANGE THIS to your actual login email
-      if (user?.email !== 'mahek@gmail.com') return;
+      if (user?.email?.toLowerCase() !== 'mahek@gmail.com') return;
 
       try {
         const token = localStorage.getItem('token');
