@@ -130,18 +130,20 @@ export default function Dashboard({ user, logout }) {
         const token = localStorage.getItem('token');
         
         // Direct call to your Render backend
-        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interviews', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        // 1. CHANGE: The URL must match your backend router prefix (/interview/history)
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-        if (!response.ok) throw new Error('Failed to fetch history');
-        
-        const data = await response.json();
-        // The backend returns the list directly or inside a 'data' field
-        setHistory(Array.isArray(data) ? data : data.data || []);
+      if (!response.ok) throw new Error('Failed to fetch history');
+      
+      const data = await response.json();
+      
+      // 2. The backend returns a list of sessions directly
+      setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Fetch error:', err);
       } finally {
