@@ -95,7 +95,7 @@ export default function Results() {
                 <span className="qr-number">Question {i + 1}</span>
                 <span className="qr-score" style={{ color: scoreColor(q.score) }}>{q.score}/10</span>
               </div>
-              <p className="qr-text"><strong>Q:</strong> {q.question_text}</p>
+              <p className="qr-text"><strong>Q:</strong> {q.question}</p>
               <p className="qr-feedback"><strong>AI Feedback:</strong> {q.feedback}</p>
             </div>
           ))}
