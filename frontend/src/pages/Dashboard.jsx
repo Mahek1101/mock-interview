@@ -280,19 +280,20 @@ export default function Dashboard({ user, logout }) {
               <div>
                 <div className="history-topic">{TOPIC_LABELS[session.topic] || session.topic}</div>
                 <div className="history-date">
-                  {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  · {session.total_questions} questions
+                  {new Date(session.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {session.total_questions} questions
                 </div>
               </div>
-              <span className="score-badge" style={{ background: `${scoreColor(session.total_score)}15`, color: scoreColor(session.total_score) }}>
-                {session.total_score}/10
-              </span>
-              <button 
-                className="view-results-btn"
-                onClick={() => navigate(`/results?sessionId=${session.id}`, { state: { sessionId: session.id } })}
-              >
-                View Details
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <span className="score-badge" style={{ background: `${scoreColor(session.total_score)}15`, color: scoreColor(session.total_score) }}>
+                  {session.total_score}/10
+                </span>
+                <button 
+                  className="view-results-btn" 
+                  onClick={() => navigate(`/results?sessionId=${session.id}`, { state: { sessionId: session.id } })}
+                >
+                  View Details
+                </button>
+              </div>
             </div>
           ))}
         </div>
