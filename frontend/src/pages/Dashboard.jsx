@@ -129,22 +129,15 @@ export default function Dashboard({ user, logout }) {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        
-        // Direct call to your Render backend
-        // 1. CHANGE: The URL must match your backend router prefix (/interview/history)
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/history', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch history');
-      
-      const data = await response.json();
-      
-      // 2. The backend returns a list of sessions directly
-      setHistory(Array.isArray(data) ? data : []);
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/history', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch history');
+        const data = await response.json();
+        setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Fetch error:', err);
       } finally {
@@ -152,8 +145,28 @@ export default function Dashboard({ user, logout }) {
       }
     };
 
+    // --- NEW ADMIN FETCH LOGIC ---
+    const fetchAdminStats = async () => {
+      // ⚠️ CHANGE THIS to your actual login email
+      if (user?.email !== 'mahek@gmail.com') return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/admin/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAdminStats(data);
+        }
+      } catch (err) {
+        console.error("Admin stats fetch failed", err);
+      }
+    };
+
     fetchHistory();
-  }, []);
+    fetchAdminStats();
+  }, [user]); // user is added here so it runs when login completes
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
