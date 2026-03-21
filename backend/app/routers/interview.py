@@ -156,21 +156,20 @@ def complete_session(session_id: int, db: DBSession = Depends(get_db), current_u
     }
 
 @router.get("/history")
-def get_history(
-    db: DBSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
+def get_history(db: DBSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # 1. Fetch sessions for this user (we include 'in_progress' to see if they exist)
     sessions = db.query(Session).filter(
-        Session.user_id == current_user.id,
-        Session.status == "completed"
+        Session.user_id == current_user.id
     ).order_by(Session.created_at.desc()).all()
-
+    
+    # 2. Return the list with safe defaults for missing scores/counts
     return [{
         "id": s.id,
         "topic": s.topic,
-        "total_score": round(s.total_score, 1),
-        "total_questions": s.total_questions,
-        "created_at": s.created_at
+        "total_score": round(s.total_score, 1) if s.total_score is not None else 0,
+        "total_questions": s.total_questions or 0,
+        "created_at": s.created_at,
+        "status": s.status
     } for s in sessions]
 
 @router.get("/results/{session_id}")
