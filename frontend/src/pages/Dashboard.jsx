@@ -186,6 +186,29 @@ export default function Dashboard({ user, logout }) {
 
       <main className="dash-main">
 
+        {user?.email === 'mahek@gmail.com' && adminStats && (
+          <div style={{ 
+            background: '#1e293b', 
+            padding: '20px', 
+            borderRadius: '12px', 
+            marginBottom: '2rem',
+            border: '1px solid #f59e0b',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ color: '#f59e0b', marginTop: 0, fontSize: '1rem' }}>📊 Admin Insights</h3>
+            <div style={{ display: 'flex', gap: '2rem' }}>
+              <div>
+                <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.8rem' }}>Total Users</p>
+                <h2 style={{ color: 'white', margin: '5px 0 0 0' }}>{adminStats.total_users}</h2>
+              </div>
+              <div>
+                <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.8rem' }}>Interviews Completed</p>
+                <h2 style={{ color: 'white', margin: '5px 0 0 0' }}>{adminStats.total_interviews}</h2>
+              </div>
+            </div>
+          </div>
+        )}
+
         {history.length > 0 && (
           <div className="stats-row">
             <div className="stat-box">
