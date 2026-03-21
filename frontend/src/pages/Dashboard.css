@@ -269,3 +269,19 @@
 }
 
 .toggle-btn:hover:not(.active) { color: #4f46e5; }
+
+.view-results-btn {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.view-results-btn:hover {
+  background-color: #4338ca;
+}
