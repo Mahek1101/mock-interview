@@ -24,19 +24,30 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
     return {"id": user.id, "username": user.username, "email": user.email}
 
 @router.post("/login")
-def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    # 1. Find the user by email
-    user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
-    
-    if not user:
-        raise HTTPException(status_code=403, detail="Invalid Credentials")
+# Change: Ensure OAuth2PasswordRequestForm is imported at the top
+from fastapi.security import OAuth2PasswordRequestForm
 
-    # 2. Check if the password matches the hashed version in the DB
-    if not utils.verify(user_credentials.password, user.password):
-        raise HTTPException(status_code=403, detail="Invalid Credentials")
+@router.post("/login")
+def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # 1. Find the user by email (FastAPI uses 'username' field for the email input)
+    user = db.query(User).filter(User.email == user_credentials.username).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Invalid Credentials"
+        )
+
+    # 2. Check password - Use verify_password and user.hashed_password
+    if not verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Invalid Credentials"
+        )
 
     # 3. Create and return the token
-    access_token = oauth2.create_access_token(data={"user_id": user.id})
+    access_token = create_access_token(data={"user_id": str(user.id)})
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me")
