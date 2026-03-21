@@ -121,6 +121,7 @@ export default function Dashboard({ user, logout }) {
   const [difficulty, setDifficulty] = useState('medium');
   const [history, setHistory]       = useState([]);
   const [loading, setLoading]       = useState(true);
+  const [adminStats, setAdminStats] = useState(null); 
   const [chartType, setChartType]   = useState('line');
 
   useEffect(() => {
