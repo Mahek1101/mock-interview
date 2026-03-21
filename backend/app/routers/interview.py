@@ -193,3 +193,32 @@ def get_session_results(session_id: int, db: DBSession = Depends(get_db), curren
             } for q in questions
         ]
     }
+
+@router.get("/admin/dashboard")
+def get_admin_data(db: DBSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # 🔒 Security Check: Only allow YOUR email
+    if current_user.email != "user@example.com":
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # 📊 Gather Statistics
+    total_users = db.query(User).count()
+    total_sessions = db.query(Session).count()
+    
+    # 📝 Get All Answers (Most recent first)
+    all_answers = db.query(Question).filter(Question.answer != "").order_by(Question.id.desc()).limit(50).all()
+
+    return {
+        "stats": {
+            "users": total_users,
+            "interviews": total_sessions
+        },
+        "recent_activity": [
+            {
+                "user": q.session.user.email,
+                "topic": q.session.topic,
+                "question": q.question,
+                "answer": q.answer,
+                "score": q.score
+            } for q in all_answers
+        ]
+    }
