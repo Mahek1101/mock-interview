@@ -197,7 +197,7 @@ def get_session_results(session_id: int, db: DBSession = Depends(get_db), curren
 @router.get("/admin/dashboard")
 def get_admin_data(db: DBSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     # 🔒 Security Check: Only allow YOUR email
-    if current_user.email != "user@example.com":
+    if current_user.email != "mahek@gmail.com":
         raise HTTPException(status_code=403, detail="Not authorized")
 
     # 📊 Gather Statistics
