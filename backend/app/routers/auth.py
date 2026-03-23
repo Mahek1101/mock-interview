@@ -29,8 +29,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 @router.post("/login")
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    # 1. Find the user by email (FastAPI uses 'username' field for the email input)
-    user = db.query(User).filter(User.email == user_credentials.username).first()
+    # 1. Normalize the input: strip spaces and convert to lowercase
+    input_email = user_credentials.username.strip().lower()
+
+    # 2. Search using the cleaned email
+    user = db.query(User).filter(User.email == input_email).first()
 
     if not user:
         raise HTTPException(
@@ -38,16 +41,14 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
             detail="Invalid Credentials"
         )
 
-    # 2. Check password - Use verify_password and user.hashed_password
+    # 3. Verify password against the hashed_password in DB
     if not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Invalid Credentials"
         )
 
-    # 3. Create and return the token
     access_token = create_access_token(data={"user_id": str(user.id)})
-    
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me")
