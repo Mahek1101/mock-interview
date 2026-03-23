@@ -285,3 +285,13 @@
 .view-results-btn:hover {
   background-color: #4338ca;
 }
+
+.dash-username {
+  color: #4b5563; /* Subtle grey */
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: #f3f4f6; /* Light bubble background */
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+}
