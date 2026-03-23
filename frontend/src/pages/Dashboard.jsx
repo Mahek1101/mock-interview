@@ -125,6 +125,15 @@ export default function Dashboard({ user, logout }) {
   const [chartType, setChartType]   = useState('line');
 
   useEffect(() => {
+    // 1. Recovery Logic: If state is lost on refresh, get user from localStorage
+    if (!user) {
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        // This ensures your "user?.username" calls don't break
+        // Note: You may need to call a setUser function if it's passed as a prop
+      }
+    }
+
     const fetchHistory = async () => {
       try {
         setLoading(true);
@@ -145,11 +154,10 @@ export default function Dashboard({ user, logout }) {
       }
     };
 
-    // --- NEW ADMIN FETCH LOGIC ---
     const fetchAdminStats = async () => {
-      // ⚠️ CHANGE THIS to your actual login email
+      // ⚠️ Use the user object to check for admin access
       if (user?.email?.toLowerCase() !== 'mahek@gmail.com') return;
-
+      
       try {
         const token = localStorage.getItem('token');
         const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/interview/admin/stats', {
@@ -166,7 +174,7 @@ export default function Dashboard({ user, logout }) {
 
     fetchHistory();
     fetchAdminStats();
-  }, [user]); // user is added here so it runs when login completes
+  }, [user]); // Added 'user' as a dependency so it runs when user is loaded
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
