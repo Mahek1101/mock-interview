@@ -24,9 +24,12 @@ export default function Login({ setUser }) {
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: formData.toString(),
+        body: JSON.stringify({
+          username: form.email.trim().toLowerCase(), // or 'email' depending on your backend schema
+          password: form.password
+        }),
       });
 
       const resData = await response.json();
