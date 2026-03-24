@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser, getMe } from '../api/auth';
 import './Auth.css';
 
 export default function Login({ setUser }) {
@@ -16,12 +15,18 @@ export default function Login({ setUser }) {
     setError('');
     setLoading(true);
     try {
+      // FastAPI's OAuth2PasswordRequestForm expects form-encoded data
+      // with a "username" field (not "email"), plus "password"
+      const formData = new URLSearchParams();
+      formData.append('username', form.email.trim().toLowerCase());
+      formData.append('password', form.password);
+
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(form),
+        body: formData.toString(),
       });
 
       const resData = await response.json();
@@ -30,17 +35,24 @@ export default function Login({ setUser }) {
         throw new Error(resData.detail || 'Invalid email or password');
       }
 
-      // 1. Store the token
+      // Store the token
       if (resData.access_token) {
         localStorage.setItem('token', resData.access_token);
       }
-      
-      // 2. Update the user state
-      if (setUser) {
-        setUser(resData.user || { email: form.email });
+
+      // Fetch the real user profile so username is available on Dashboard
+      const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
+        headers: { 'Authorization': `Bearer ${resData.access_token}` }
+      });
+
+      if (meResponse.ok) {
+        const userData = await meResponse.json();
+        if (setUser) setUser(userData);
+      } else {
+        // Fallback: at least set email so the dashboard doesn't break
+        if (setUser) setUser({ email: form.email });
       }
 
-      // 3. Move to dashboard
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Invalid email or password');
@@ -75,11 +87,25 @@ export default function Login({ setUser }) {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
+              <input
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                required
+              />
             </div>
             <div className="field">
               <label>Password</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
+              <input
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
             </div>
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? 'Logging in...' : 'Log in →'}
