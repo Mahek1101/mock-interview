@@ -32,7 +32,10 @@ export default function Login({ setUser }) {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.detail || 'Invalid email or password');
+        const errorMessage = typeof resData.detail === 'object' 
+          ? JSON.stringify(resData.detail) 
+          : resData.detail;
+        throw new Error(errorMessage || 'Invalid email or password');
       }
 
       // Store the token
@@ -82,7 +85,7 @@ export default function Login({ setUser }) {
           <h1 className="auth-card-title">Welcome back 👋</h1>
           <p className="auth-card-subtitle">Log in to continue practicing</p>
 
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="auth-error">{typeof error === 'object' ? 'An error occurred' : error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
