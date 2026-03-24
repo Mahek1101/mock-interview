@@ -104,13 +104,14 @@ export default function Login({ setUser }) {
             </div>
             <div className="field">
               <label>Password</label>
-              <input
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
+              <input 
+                name="password" 
+                type="password" 
+                value={form.password} 
+                onChange={handleChange} 
+                placeholder="••••••••" 
+                required 
+                autoComplete="new-password"
               />
             </div>
             <button type="submit" className="auth-btn" disabled={loading}>
