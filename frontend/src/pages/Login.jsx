@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { loginUser, getMe } from '../api/auth';
 import './Auth.css';
 
 export default function Login({ setUser }) {
@@ -11,51 +12,42 @@ export default function Login({ setUser }) {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
-  try {
-    const formData = new URLSearchParams();
-    // The backend's OAuth2 form REQUIRES the key to be "username"
-    formData.append('username', form.email.trim().toLowerCase());
-    formData.append('password', form.password);
-
-    const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
-      method: 'POST',
-      // Note: No headers needed! URLSearchParams sets them automatically.
-      body: formData, 
-    });
-
-    const resData = await response.json();
-
-    if (!response.ok) {
-      const errorMessage = typeof resData.detail === 'object' 
-        ? JSON.stringify(resData.detail) 
-        : resData.detail;
-      throw new Error(errorMessage || 'Invalid email or password');
-    }
-
-    if (resData.access_token) {
-      localStorage.setItem('token', resData.access_token);
-      
-      // Fetch user profile after successful login
-      const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
-        headers: { 'Authorization': `Bearer ${resData.access_token}` }
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
       });
 
-      if (meResponse.ok) {
-        const userData = await meResponse.json();
-        if (setUser) setUser(userData);
+      const resData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(resData.detail || 'Invalid email or password');
+      }
+
+      // 1. Store the token
+      if (resData.access_token) {
+        localStorage.setItem('token', resData.access_token);
       }
       
+      // 2. Update the user state
+      if (setUser) {
+        setUser(resData.user || { email: form.email });
+      }
+
+      // 3. Move to dashboard
       navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Invalid email or password');
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError(err.message || 'Connection failed');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="auth-wrapper">
@@ -78,31 +70,16 @@ export default function Login({ setUser }) {
           <h1 className="auth-card-title">Welcome back 👋</h1>
           <p className="auth-card-subtitle">Log in to continue practicing</p>
 
-          {error && <div className="auth-error">{typeof error === 'object' ? 'An error occurred' : error}</div>}
+          {error && <div className="auth-error">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
-              <input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-              />
+              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
             </div>
             <div className="field">
               <label>Password</label>
-              <input 
-                name="password" 
-                type="password" 
-                value={form.password} 
-                onChange={handleChange} 
-                placeholder="••••••••" 
-                required 
-                autoComplete="new-password"
-              />
+              <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
             </div>
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? 'Logging in...' : 'Log in →'}
