@@ -27,7 +27,7 @@ export default function Login({ setUser }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: form.email.trim().toLowerCase(), // or 'email' depending on your backend schema
+          email: form.email.trim().toLowerCase(),
           password: form.password
         }),
       });
