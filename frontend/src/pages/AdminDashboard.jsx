@@ -25,14 +25,13 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        // If this runs, it means your email is not authorized as an admin
-        throw new Error('Access Denied: You must be logged in as patel@gmail.com');
+        // This will tell us if it's a 401 (Unauthenticated) or 403 (Not an Admin)
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Error ${response.status}: Server rejected the admin request`);
       }
 
       const data = await response.json();
-      
-      // Some backends return the array directly, others return { users: [] }
-      // This line handles both:
+      // Ensure we handle the data whether it's an array or an object
       const userList = Array.isArray(data) ? data : (data.users || []);
       setUsers(userList);
       } catch (err) {
