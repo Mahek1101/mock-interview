@@ -21,7 +21,10 @@ export default function Register({ setUser }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+        ...form,
+        email: form.email.trim().toLowerCase()
+      }),
       });
 
       if (!response.ok) {
