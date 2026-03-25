@@ -1,46 +1,49 @@
 import React, { useState } from 'react';
-import { useNaviagte, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
 export default function Login() {
-  const naviagte = useNaviagte();
-  const [form, setForm] useState({ email: '', passowrd: '' });
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    try{
+    
+    try {
       const params = new URLSearchParams();
       params.append('username', form.email.trim().toLowerCase());
-      params.appemd('password', form.password);
-
+      params.append('password', form.password);
+      
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString(),
       });
-
+      
       const resData = await response.json();
-
+      
       if (!response.ok) {
-        const message = typeof resData.detail === 'string' ? resData.detail: 'Invalid credentials';
+        const message = typeof resData.detail === 'string' ? resData.detail : 'Invalid credentials';
         throw new Error(message);
       }
-
-      localStorage.setITem('token', resData.access_token);
-      windoe.location,href = '/dashboard';
+      
+      if (resData.access_token) {
+        localStorage.setItem('token', resData.access_token);
+        window.location.href = '/dashboard';
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
@@ -64,4 +67,3 @@ export default function Login() {
     </div>
   );
 }
-        
