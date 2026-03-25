@@ -15,28 +15,22 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // FastAPI OAuth2PasswordRequestForm expects application/x-www-form-urlencoded
-      const details = {
-        'username': form.email.trim().toLowerCase(),
-        'password': form.password
-      };
-
-      const formBody = Object.keys(details)
-        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
-        .join('&');
-
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          'Content-Type': 'application/json',
         },
-        body: formBody
+        // Sending as a JSON object to satisfy the Pydantic validator
+        body: JSON.stringify({
+          email: form.email.trim().toLowerCase(),
+          password: form.password
+        }),
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        // Unpack the error message so it doesn't show [object Object]
+        // Handle FastAPI detail objects to avoid [object Object]
         let msg = 'Invalid email or password';
         if (typeof resData.detail === 'string') {
           msg = resData.detail;
@@ -46,8 +40,10 @@ export default function Login() {
         throw new Error(msg);
       }
 
-      localStorage.setItem('token', resData.access_token);
-      window.location.href = '/dashboard';
+      if (resData.access_token) {
+        localStorage.setItem('token', resData.access_token);
+        window.location.href = '/dashboard';
+      }
     } catch (err) {
       setError(err.message);
     } finally {
