@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
 export default function Login() {
-  const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +16,6 @@ export default function Login() {
 
     try {
       const params = new URLSearchParams();
-      // FastAPI OAuth2PasswordRequestForm MUST use the key 'username'
       params.append('username', form.email.trim().toLowerCase());
       params.append('password', form.password);
 
@@ -30,7 +28,14 @@ export default function Login() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.detail || 'Invalid email or password');
+        // FIX FOR [object Object]:
+        let msg = 'Invalid email or password';
+        if (typeof resData.detail === 'string') {
+          msg = resData.detail;
+        } else if (Array.isArray(resData.detail)) {
+          msg = resData.detail[0].msg; // Takes the first error message from FastAPI
+        }
+        throw new Error(msg);
       }
 
       localStorage.setItem('token', resData.access_token);
@@ -49,16 +54,12 @@ export default function Login() {
           <span className="auth-left-icon">🤖</span>
           <h2 className="auth-left-title">Practice makes perfect</h2>
           <p className="auth-left-subtitle">Sharpen your interview skills with AI-powered mock interviews.</p>
-          <div className="auth-left-features">
-            <div className="auth-feature"><div className="auth-feature-dot"></div>AI-generated questions</div>
-            <div className="auth-feature"><div className="auth-feature-dot"></div>Instant feedback</div>
-          </div>
         </div>
       </div>
       <div className="auth-right">
         <div className="auth-card">
           <h1 className="auth-card-title">Welcome back 👋</h1>
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="auth-error" style={{color: '#ff4d4d', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '5px', marginBottom: '15px'}}>{error}</div>}
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
