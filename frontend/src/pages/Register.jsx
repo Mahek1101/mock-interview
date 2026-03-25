@@ -28,8 +28,11 @@ export default function Register({ setUser }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Registration failed');
+        const message = typeof resData.detail === 'string' 
+          ? resData.detail 
+          : (resData.detail?.[0]?.msg || JSON.stringify(resData.detail));
+        throw new Error(message);
+      }
       }
       navigate('/login');
     } catch (err) {
