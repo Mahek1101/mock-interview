@@ -17,7 +17,6 @@ export default function Login({ setUser }) {
 
     try {
       const params = new URLSearchParams();
-      // Using 'username' to match your FastAPI backend requirement
       params.append('username', form.email.trim().toLowerCase());
       params.append('password', form.password);
 
@@ -49,7 +48,7 @@ export default function Login({ setUser }) {
     <div className="auth-wrapper">
       <div className="auth-card">
         <h1>Welcome back 👋</h1>
-        {error && <div className="auth-error" style={{color: 'red'}}>{error}</div>}
+        {error && <div className="auth-error" style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="field">
             <label>Email</label>
@@ -63,7 +62,9 @@ export default function Login({ setUser }) {
             {loading ? 'Logging in...' : 'Log in →'}
           </button>
         </form>
-        <p className="auth-switch">No account? <Link to="/register">Sign up</Link></p>
+        <p className="auth-switch" style={{marginTop: '15px'}}>
+          No account? <Link to="/register">Sign up</Link>
+        </p>
       </div>
     </div>
   );
