@@ -15,31 +15,35 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Use FormData which is the most reliable for FastAPI OAuth2
-      const formData = new FormData();
-      formData.append('username', form.email.trim().toLowerCase());
-      formData.append('password', form.password);
+      // FastAPI OAuth2PasswordRequestForm expects application/x-www-form-urlencoded
+      const details = {
+        'username': form.email.trim().toLowerCase(),
+        'password': form.password
+      };
+
+      const formBody = Object.keys(details)
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key]))
+        .join('&');
 
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
-        // DO NOT set Content-Type header when using FormData; 
-        // the browser will set it automatically with the correct boundary.
-        body: formData, 
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        },
+        body: formBody
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        // Fix for [object Object] - extract the human-readable message
-        let errorMessage = 'Invalid email or password';
+        // Unpack the error message so it doesn't show [object Object]
+        let msg = 'Invalid email or password';
         if (typeof resData.detail === 'string') {
-          errorMessage = resData.detail;
+          msg = resData.detail;
         } else if (Array.isArray(resData.detail)) {
-          errorMessage = resData.detail[0].msg;
-        } else if (resData.detail?.message) {
-          errorMessage = resData.detail.message;
+          msg = resData.detail[0].msg;
         }
-        throw new Error(errorMessage);
+        throw new Error(msg);
       }
 
       localStorage.setItem('token', resData.access_token);
@@ -63,7 +67,7 @@ export default function Login() {
       <div className="auth-right">
         <div className="auth-card">
           <h1 className="auth-card-title">Welcome back 👋</h1>
-          {error && <div className="auth-error" style={{color: '#ff4d4d', backgroundColor: '#ffe6e6', padding: '10px', borderRadius: '5px', marginBottom: '15px'}}>{error}</div>}
+          {error && <div className="auth-error" style={{color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '4px', marginBottom: '15px', border: '1px solid #f5c6cb'}}>{error}</div>}
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
