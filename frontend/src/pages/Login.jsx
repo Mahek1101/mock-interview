@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
-export default function Login() {
+export default function Login({ setUser }) {
+  const navigate = useNavigate(); // THIS WAS MISSING
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,20 +28,19 @@ export default function Login() {
       const resData = await response.json();
 
       if (!response.ok) {
-        let msg = typeof resData.detail === 'string' ? resData.detail : 'Login failed';
+        let msg = typeof resData.detail === 'string' ? resData.detail : 'Invalid credentials';
         throw new Error(msg);
       }
 
       if (resData.access_token) {
-        // 1. Save the token
         localStorage.setItem('token', resData.access_token);
         
-        // 2. If you have a setUser function passed as a prop, call it
-        if (typeof setUser === 'function') {
+        // Update user state so App.jsx knows we are logged in
+        if (setUser) {
           setUser(resData.user || { email: form.email });
         }
 
-        // 3. Navigate to dashboard without a full page reload
+        // Now navigate will work!
         navigate('/dashboard');
       }
     } catch (err) {
@@ -62,7 +62,7 @@ export default function Login() {
       <div className="auth-right">
         <div className="auth-card">
           <h1 className="auth-card-title">Welcome back 👋</h1>
-          {error && <div className="auth-error" style={{color: '#721c24', backgroundColor: '#f8d7da', padding: '10px', borderRadius: '4px', marginBottom: '15px', border: '1px solid #f5c6cb'}}>{error}</div>}
+          {error && <div className="auth-error">{error}</div>}
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
