@@ -35,7 +35,7 @@ function App() {
         <Route path="/dashboard"          element={user ? <Dashboard user={user} logout={logout} /> : <Navigate to="/login" />} />
         <Route path="/interview/:topic"   element={user ? <Interview user={user} /> : <Navigate to="/login" />} />
         <Route path="/results"            element={user ? <Results /> : <Navigate to="/login" />} />
-        <Route 
+        <Route
           path="/admin" 
           element={
             user && user.email === 'patel@gmail.com' 
