@@ -54,3 +54,9 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "username": current_user.username, "email": current_user.email}
+
+@router.get("/admin/users")
+def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Optional: Add a check to ensure current_user.is_admin is True 
+    users = db.query(User).all()
+    return {"total_users": len(users), "users": users}
