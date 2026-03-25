@@ -17,8 +17,10 @@ export default function Login({ setUser }) {
 
   try {
     const params = new URLSearchParams();
-    // Use 'username' because OAuth2PasswordRequestForm requires this specific key
-    params.append('username', form.email.trim().toLowerCase());
+    
+    // CRITICAL: FastAPI OAuth2 form MUST use the key "username"
+    // even though we are passing the email value.
+    params.append('username', form.email.trim().toLowerCase()); 
     params.append('password', form.password);
 
     const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
@@ -26,13 +28,13 @@ export default function Login({ setUser }) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: params, 
+      body: params.toString(), 
     });
 
     const resData = await response.json();
 
     if (!response.ok) {
-      // This part fixes the [object Object] error
+      // Improved error handling to stop the [object Object] error
       const message = typeof resData.detail === 'string' 
         ? resData.detail 
         : (resData.detail?.[0]?.msg || 'Invalid email or password');
@@ -40,7 +42,9 @@ export default function Login({ setUser }) {
     }
 
     localStorage.setItem('token', resData.access_token);
-    window.location.href = '/dashboard'; // Using href to force a clean state
+    // Use window.location to refresh the app state completely
+    window.location.href = '/dashboard'; 
+    
   } catch (err) {
     setError(err.message);
   } finally {
