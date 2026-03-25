@@ -16,35 +16,31 @@ export default function Login({ setUser }) {
   setLoading(true);
 
   try {
-    const formData = new URLSearchParams();
-    // Ensure these keys are exactly "username" and "password"
-    formData.append('username', form.email.trim().toLowerCase());
-    formData.append('password', form.password);
+    const params = new URLSearchParams();
+    // Use 'username' because OAuth2PasswordRequestForm requires this specific key
+    params.append('username', form.email.trim().toLowerCase());
+    params.append('password', form.password);
 
     const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json', // Added this to help FastAPI
       },
-      body: formData.toString(), // Added .toString() here
+      body: params, 
     });
 
     const resData = await response.json();
 
     if (!response.ok) {
-      // Improved error handling for the [object Object] issue
-      const message = resData.detail && typeof resData.detail === 'string' 
+      // This part fixes the [object Object] error
+      const message = typeof resData.detail === 'string' 
         ? resData.detail 
-        : "Invalid email or password";
+        : (resData.detail?.[0]?.msg || 'Invalid email or password');
       throw new Error(message);
     }
 
-    if (resData.access_token) {
-      localStorage.setItem('token', resData.access_token);
-      // ... rest of your logic
-      navigate('/dashboard');
-    }
+    localStorage.setItem('token', resData.access_token);
+    window.location.href = '/dashboard'; // Using href to force a clean state
   } catch (err) {
     setError(err.message);
   } finally {
