@@ -17,20 +17,23 @@ export default function AdminDashboard() {
           return;
         }
 
-        // Calling the new admin endpoint you added to auth.py
-        const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch users. Make sure you are an admin.');
+        // 1. Correct the endpoint URL (removed 'auth/')
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
+      });
 
-        const data = await response.json();
-        // Assuming your backend returns { "users": [...], "total_users": X }
-        setUsers(data.users || []);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users. Make sure you are an admin.');
+      }
+
+      const data = await response.json();
+      
+      // 2. Handle both object {users: []} and direct array [] formats
+      const userList = Array.isArray(data) ? data : (data.users || []);
+      setUsers(userList);
       } catch (err) {
         setError(err.message);
       } finally {
