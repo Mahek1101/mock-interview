@@ -12,9 +12,8 @@ export default function AdminDashboard() {
     const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) throw new Error("No token found");
-
-      // The correct path based on your prefix="/auth" in auth.py
+      
+      // Fixed URL: Combined prefix "/auth" + path "/admin/users"
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -24,26 +23,24 @@ export default function AdminDashboard() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Failed to fetch users');
+        throw new Error(errorData.detail || 'Access Denied: Admin privileges required.');
       }
 
       const data = await response.json();
       
-      // Your backend returns: { total_users: X, users: [...] }
-      // We need to set the state to the 'users' array specifically
+      // Your auth.py returns an object: {"total_users": X, "users": [...]}
+      // We must access data.users specifically
       if (data && data.users) {
         setUsers(data.users);
       } else {
         setUsers([]);
       }
     } catch (err) {
-      console.error("Fetch Error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
     fetchUsers();
   }, [navigate]);
 
