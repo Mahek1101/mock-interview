@@ -187,14 +187,24 @@ export default function Dashboard({ user, logout }) {
       <header className="dash-header">
         <h1 className="dash-logo">🤖 AI Mock Interview</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {/* This line ensures a name always shows */}
+    
+          {/* ADD THE ADMIN LINK HERE */}
+          {user && user.email === 'patel@gmail.com' && (
+            <button 
+              onClick={() => navigate('/admin')} 
+              className="dash-logout" 
+              style={{ background: '#f59e0b', color: 'white' }}
+            >
+              🛡️ Admin
+            </button>
+          )}
+
           <span className="dash-username">
             {user?.username || user?.email?.split('@')[0]}
           </span>
-         <button className="dash-logout" onClick={handleLogout}>Log out</button>
+          <button className="dash-logout" onClick={handleLogout}>Log out</button>
         </div>
       </header>
-
       <main className="dash-main">
 
         {user?.email === 'mahek@gmail.com' && adminStats && (
