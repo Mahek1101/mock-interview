@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Interview from './pages/Interview';
 import Results from './pages/Results';
+import AdminDashboard from './pages/AdminDashboard';
 import './styles/global.css';
 
 function App() {
@@ -34,6 +35,14 @@ function App() {
         <Route path="/dashboard"          element={user ? <Dashboard user={user} logout={logout} /> : <Navigate to="/login" />} />
         <Route path="/interview/:topic"   element={user ? <Interview user={user} /> : <Navigate to="/login" />} />
         <Route path="/results"            element={user ? <Results /> : <Navigate to="/login" />} />
+        <Route 
+          path="/admin" 
+          element={
+            user && user.email === 'patel@gmail.com' 
+              ? <AdminDashboard /> 
+              : <Navigate to="/dashboard" />
+          } 
+        />
       </Routes>
     </Router>
   );
