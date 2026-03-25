@@ -18,14 +18,15 @@ export default function Register({ setUser }) {
     try {
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-        ...form,
-        email: form.email.trim().toLowerCase()
-      }),
+          ...form,
+          email: form.email.trim().toLowerCase() 
+        }),
       });
+
+      // FIX: You must define resData before using it!
+      const resData = await response.json();
 
       if (!response.ok) {
         const message = typeof resData.detail === 'string' 
@@ -33,8 +34,10 @@ export default function Register({ setUser }) {
           : (resData.detail?.[0]?.msg || JSON.stringify(resData.detail));
         throw new Error(message);
       }
-      }
+
+      // Move navigate inside the try block
       navigate('/login');
+    }
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {
