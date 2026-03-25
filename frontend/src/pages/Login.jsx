@@ -11,62 +11,58 @@ export default function Login({ setUser }) {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      // Your backend auth.py uses "payload: UserLogin", which expects JSON.
-      // We must send a JSON object with the key "email", NOT "username".
-      const loginData = {
-        email: form.email.trim(),
-        password: form.password
-      };
+  try {
+    // 1. Create URLSearchParams (Form Data) to match OAuth2 standards
+    const formData = new URLSearchParams();
+    
+    // The backend 'user_credentials.username' expects your email
+    formData.append('username', form.email.trim().toLowerCase());
+    formData.append('password', form.password);
 
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
+    const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
+      method: 'POST',
+      headers: {
+        // This header tells FastAPI to parse the body as a Form, not JSON
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData,
+    });
+
+    const resData = await response.json();
+
+    if (!response.ok) {
+      // Your backend now returns "Invalid Credentials" on failure
+      throw new Error(resData.detail || 'Invalid email or password');
+    }
+
+    // 2. If successful, save token and fetch user profile
+    if (resData.access_token) {
+      localStorage.setItem('token', resData.access_token);
+
+      const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
+        headers: { 
+          'Authorization': `Bearer ${resData.access_token}` 
+        }
       });
 
-      const resData = await response.json();
-
-      if (!response.ok) {
-        // FastAPI returns errors in a 'detail' field
-        const errorMessage = typeof resData.detail === 'object' 
-          ? JSON.stringify(resData.detail) 
-          : resData.detail;
-        throw new Error(errorMessage || 'Invalid email or password');
+      if (meResponse.ok) {
+        const userData = await meResponse.json();
+        if (setUser) setUser(userData);
       }
 
-      // If login is successful, we get the access_token
-      if (resData.access_token) {
-        localStorage.setItem('token', resData.access_token);
-
-        // Fetch user profile from the /me endpoint
-        const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
-          headers: { 
-            'Authorization': `Bearer ${resData.access_token}` 
-          }
-        });
-
-        if (meResponse.ok) {
-          const userData = await meResponse.json();
-          if (setUser) setUser(userData);
-          navigate('/dashboard');
-        } else {
-          throw new Error('Failed to fetch user profile');
-        }
-      }
-    } catch (err) {
-      console.error("Login Error:", err);
-      setError(err.message || 'Connection failed');
-    } finally {
-      setLoading(false);
+      navigate('/dashboard');
     }
-  };
+  } catch (err) {
+    console.error("Login Error:", err);
+    setError(err.message || 'Login failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="auth-wrapper">
