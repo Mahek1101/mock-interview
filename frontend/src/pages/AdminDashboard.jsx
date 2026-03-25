@@ -17,8 +17,7 @@ export default function AdminDashboard() {
           return;
         }
 
-        // 1. Correct the endpoint URL (removed 'auth/')
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/admin/users', {
+       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -26,12 +25,14 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch users. Make sure you are an admin.');
+        // If this runs, it means your email is not authorized as an admin
+        throw new Error('Access Denied: You must be logged in as patel@gmail.com');
       }
 
       const data = await response.json();
       
-      // 2. Handle both object {users: []} and direct array [] formats
+      // Some backends return the array directly, others return { users: [] }
+      // This line handles both:
       const userList = Array.isArray(data) ? data : (data.users || []);
       setUsers(userList);
       } catch (err) {
