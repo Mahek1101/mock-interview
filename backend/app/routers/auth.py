@@ -60,4 +60,6 @@ def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(ge
         raise HTTPException(status_code=403, detail="Admin privileges required")
         
     users = db.query(User).all()
-    return {"total_users": len(users), "users": users}
+    # Simple list of emails to test if the connection works
+    user_list = [{"id": u.id, "username": u.username, "email": u.email} for u in users]
+    return {"total_users": len(user_list), "users": user_list}
