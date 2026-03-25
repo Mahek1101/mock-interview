@@ -16,52 +16,37 @@ export default function Login({ setUser }) {
   setLoading(true);
 
   try {
-    // 1. Create URLSearchParams (Form Data) to match OAuth2 standards
     const formData = new URLSearchParams();
-    
-    // The backend 'user_credentials.username' expects your email
+    // Ensure these keys are exactly "username" and "password"
     formData.append('username', form.email.trim().toLowerCase());
     formData.append('password', form.password);
 
     const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
       method: 'POST',
       headers: {
-        // This header tells FastAPI to parse the body as a Form, not JSON
         'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json', // Added this to help FastAPI
       },
-      body: formData,
+      body: formData.toString(), // Added .toString() here
     });
 
     const resData = await response.json();
 
     if (!response.ok) {
-      // Your backend now returns "Invalid Credentials" on failure
-      const errorMsg = typeof resData.detail === 'string' 
+      // Improved error handling for the [object Object] issue
+      const message = resData.detail && typeof resData.detail === 'string' 
         ? resData.detail 
-        : JSON.stringify(resData.detail);
-      throw new Error(errorMsg || 'Invalid email or password');
+        : "Invalid email or password";
+      throw new Error(message);
     }
 
-    // 2. If successful, save token and fetch user profile
     if (resData.access_token) {
       localStorage.setItem('token', resData.access_token);
-
-      const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
-        headers: { 
-          'Authorization': `Bearer ${resData.access_token}` 
-        }
-      });
-
-      if (meResponse.ok) {
-        const userData = await meResponse.json();
-        if (setUser) setUser(userData);
-      }
-
+      // ... rest of your logic
       navigate('/dashboard');
     }
   } catch (err) {
-    console.error("Login Error:", err);
-    setError(err.message || 'Login failed');
+    setError(err.message);
   } finally {
     setLoading(false);
   }
