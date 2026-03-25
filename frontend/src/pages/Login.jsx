@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { loginUser, getMe } from '../api/auth';
 import './Auth.css';
 
 export default function Login({ setUser }) {
   const navigate = useNavigate();
-  const [form, setForm]       = useState({ email: '', password: '' });
-  const [error, setError]     = useState('');
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,35 +14,55 @@ export default function Login({ setUser }) {
     e.preventDefault();
     setError('');
     setLoading(true);
+
     try {
+      // Your backend auth.py uses "payload: UserLogin", which expects JSON.
+      // We must send a JSON object with the key "email", NOT "username".
+      const loginData = {
+        email: form.email.trim(),
+        password: form.password
+      };
+
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(loginData),
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.detail || 'Invalid email or password');
+        // FastAPI returns errors in a 'detail' field
+        const errorMessage = typeof resData.detail === 'object' 
+          ? JSON.stringify(resData.detail) 
+          : resData.detail;
+        throw new Error(errorMessage || 'Invalid email or password');
       }
 
-      // 1. Store the token
+      // If login is successful, we get the access_token
       if (resData.access_token) {
         localStorage.setItem('token', resData.access_token);
-      }
-      
-      // 2. Update the user state
-      if (setUser) {
-        setUser(resData.user || { email: form.email });
-      }
 
-      // 3. Move to dashboard
-      navigate('/dashboard');
+        // Fetch user profile from the /me endpoint
+        const meResponse = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/me', {
+          headers: { 
+            'Authorization': `Bearer ${resData.access_token}` 
+          }
+        });
+
+        if (meResponse.ok) {
+          const userData = await meResponse.json();
+          if (setUser) setUser(userData);
+          navigate('/dashboard');
+        } else {
+          throw new Error('Failed to fetch user profile');
+        }
+      }
     } catch (err) {
-      setError(err.message || 'Invalid email or password');
+      console.error("Login Error:", err);
+      setError(err.message || 'Connection failed');
     } finally {
       setLoading(false);
     }
