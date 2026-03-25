@@ -17,6 +17,7 @@ export default function Login({ setUser }) {
 
     try {
       const params = new URLSearchParams();
+      // Using 'username' to match your FastAPI backend requirement
       params.append('username', form.email.trim().toLowerCase());
       params.append('password', form.password);
 
@@ -29,9 +30,7 @@ export default function Login({ setUser }) {
       const resData = await response.json();
 
       if (!response.ok) {
-        const message = typeof resData.detail === 'string' 
-          ? resData.detail 
-          : (resData.detail?.[0]?.msg || 'Invalid email or password');
+        const message = typeof resData.detail === 'string' ? resData.detail : 'Invalid email or password';
         throw new Error(message);
       }
 
@@ -48,32 +47,23 @@ export default function Login({ setUser }) {
 
   return (
     <div className="auth-wrapper">
-      <div className="auth-left">
-        <div className="auth-left-content">
-          <span className="auth-left-icon">🤖</span>
-          <h2 className="auth-left-title">Practice makes perfect</h2>
-          <p className="auth-left-subtitle">Sharpen your interview skills with AI-powered mock interviews.</p>
-        </div>
-      </div>
-      <div className="auth-right">
-        <div className="auth-card">
-          <h1 className="auth-card-title">Welcome back 👋</h1>
-          {error && <div className="auth-error">{error}</div>}
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="field">
-              <label>Email</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} required />
-            </div>
-            <div className="field">
-              <label>Password</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange} required />
-            </div>
-            <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? 'Logging in...' : 'Log in →'}
-            </button>
-          </form>
-          <p className="auth-switch">No account yet? <Link to="/register">Sign up</Link></p>
-        </div>
+      <div className="auth-card">
+        <h1>Welcome back 👋</h1>
+        {error && <div className="auth-error" style={{color: 'red'}}>{error}</div>}
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="field">
+            <label>Email</label>
+            <input name="email" type="email" value={form.email} onChange={handleChange} required />
+          </div>
+          <div className="field">
+            <label>Password</label>
+            <input name="password" type="password" value={form.password} onChange={handleChange} required />
+          </div>
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? 'Logging in...' : 'Log in →'}
+          </button>
+        </form>
+        <p className="auth-switch">No account? <Link to="/register">Sign up</Link></p>
       </div>
     </div>
   );
