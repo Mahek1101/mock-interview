@@ -55,6 +55,9 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @router.get("/admin/users")
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Optional: Add a check to ensure current_user.is_admin is True 
+    # Hardcoded check for your admin email
+    if current_user.email != "patel@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin privileges required")
+        
     users = db.query(User).all()
     return {"total_users": len(users), "users": users}
