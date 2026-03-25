@@ -156,7 +156,7 @@ export default function Dashboard({ user, logout }) {
 
     const fetchAdminStats = async () => {
       // ⚠️ Use the user object to check for admin access
-      if (user?.email?.toLowerCase() !== 'mahek@gmail.com') return;
+      if (user?.email?.toLowerCase() !== 'patel@gmail.com') return;
       
       try {
         const token = localStorage.getItem('token');
@@ -207,7 +207,7 @@ export default function Dashboard({ user, logout }) {
       </header>
       <main className="dash-main">
 
-        {user?.email === 'mahek@gmail.com' && adminStats && (
+        {user?.email === 'patel@gmail.com' && adminStats && (
           <div style={{ 
             background: '#1e293b', 
             padding: '20px', 
