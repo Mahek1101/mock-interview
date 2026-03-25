@@ -36,7 +36,10 @@ export default function Login({ setUser }) {
 
     if (!response.ok) {
       // Your backend now returns "Invalid Credentials" on failure
-      throw new Error(resData.detail || 'Invalid email or password');
+      const errorMsg = typeof resData.detail === 'string' 
+        ? resData.detail 
+        : JSON.stringify(resData.detail);
+      throw new Error(errorMsg || 'Invalid email or password');
     }
 
     // 2. If successful, save token and fetch user profile
