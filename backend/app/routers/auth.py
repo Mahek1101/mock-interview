@@ -55,11 +55,20 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @router.get("/admin/users")
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # Hardcoded check for your admin email
+    # 1. Check if the user is actually you
     if current_user.email != "patel@gmail.com":
         raise HTTPException(status_code=403, detail="Admin privileges required")
-        
+    
+    # 2. Fetch users
     users = db.query(User).all()
-    # Simple list of emails to test if the connection works
-    user_list = [{"id": u.id, "username": u.username, "email": u.email} for u in users]
-    return {"total_users": len(user_list), "users": user_list}
+    
+    # 3. Convert to a clean list of dictionaries (Safe for JSON)
+    user_data = []
+    for u in users:
+        user_data.append({
+            "id": u.id,
+            "username": u.username,
+            "email": u.email
+        })
+        
+    return {"total_users": len(user_data), "users": user_data}
