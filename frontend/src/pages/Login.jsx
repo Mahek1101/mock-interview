@@ -11,46 +11,45 @@ export default function Login({ setUser }) {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  setLoading(true);
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-  try {
-    const params = new URLSearchParams();
-    
-    // CRITICAL: FastAPI OAuth2 form MUST use the key "username"
-    // even though we are passing the email value.
-    params.append('username', form.email.trim().toLowerCase()); 
-    params.append('password', form.password);
+    try {
+      const params = new URLSearchParams();
+      // FastAPI OAuth2 requires the key "username" for the login ID
+      params.append('username', form.email.trim().toLowerCase());
+      params.append('password', form.password);
 
-    const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params.toString(), 
-    });
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      });
 
-    const resData = await response.json();
+      const resData = await response.json();
 
-    if (!response.ok) {
-      // Improved error handling to stop the [object Object] error
-      const message = typeof resData.detail === 'string' 
-        ? resData.detail 
-        : (resData.detail?.[0]?.msg || 'Invalid email or password');
-      throw new Error(message);
+      if (!response.ok) {
+        // Handle complex error objects from FastAPI
+        const message = typeof resData.detail === 'string' 
+          ? resData.detail 
+          : (resData.detail?.[0]?.msg || 'Invalid email or password');
+        throw new Error(message);
+      }
+
+      if (resData.access_token) {
+        localStorage.setItem('token', resData.access_token);
+        // Refresh the page to the dashboard to clear any stale state
+        window.location.href = '/dashboard';
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem('token', resData.access_token);
-    // Use window.location to refresh the app state completely
-    window.location.href = '/dashboard'; 
-    
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="auth-wrapper">
@@ -67,14 +66,11 @@ export default function Login({ setUser }) {
           </div>
         </div>
       </div>
-
       <div className="auth-right">
         <div className="auth-card">
           <h1 className="auth-card-title">Welcome back 👋</h1>
           <p className="auth-card-subtitle">Log in to continue practicing</p>
-
           {error && <div className="auth-error">{error}</div>}
-
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
@@ -88,7 +84,6 @@ export default function Login({ setUser }) {
               {loading ? 'Logging in...' : 'Log in →'}
             </button>
           </form>
-
           <p className="auth-switch">No account yet? <Link to="/register">Sign up for free</Link></p>
         </div>
       </div>
