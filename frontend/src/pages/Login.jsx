@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
 
@@ -17,22 +17,18 @@ export default function Login({ setUser }) {
 
     try {
       const params = new URLSearchParams();
-      // FastAPI OAuth2 requires the key "username" for the login ID
       params.append('username', form.email.trim().toLowerCase());
       params.append('password', form.password);
 
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params.toString(),
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        // Handle complex error objects from FastAPI to avoid [object Object]
         const message = typeof resData.detail === 'string' 
           ? resData.detail 
           : (resData.detail?.[0]?.msg || 'Invalid email or password');
@@ -41,7 +37,6 @@ export default function Login({ setUser }) {
 
       if (resData.access_token) {
         localStorage.setItem('token', resData.access_token);
-        // Using window.location to ensure the whole app state resets for the dashboard
         window.location.href = '/dashboard';
       }
     } catch (err) {
@@ -57,34 +52,27 @@ export default function Login({ setUser }) {
         <div className="auth-left-content">
           <span className="auth-left-icon">🤖</span>
           <h2 className="auth-left-title">Practice makes perfect</h2>
-          <p className="auth-left-subtitle">Sharpen your interview skills with AI-powered mock interviews and real-time feedback.</p>
-          <div className="auth-left-features">
-            <div className="auth-feature"><div className="auth-feature-dot"></div>AI-generated interview questions</div>
-            <div className="auth-feature"><div className="auth-feature-dot"></div>Instant feedback and scoring</div>
-            <div className="auth-feature"><div className="auth-feature-dot"></div>Track your progress over time</div>
-            <div className="auth-feature"><div className="auth-feature-dot"></div>Frontend, backend, behavioral topics</div>
-          </div>
+          <p className="auth-left-subtitle">Sharpen your interview skills with AI-powered mock interviews.</p>
         </div>
       </div>
       <div className="auth-right">
         <div className="auth-card">
           <h1 className="auth-card-title">Welcome back 👋</h1>
-          <p className="auth-card-subtitle">Log in to continue practicing</p>
           {error && <div className="auth-error">{error}</div>}
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Email</label>
-              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="you@example.com" required />
+              <input name="email" type="email" value={form.email} onChange={handleChange} required />
             </div>
             <div className="field">
               <label>Password</label>
-              <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
+              <input name="password" type="password" value={form.password} onChange={handleChange} required />
             </div>
             <button type="submit" className="auth-btn" disabled={loading}>
               {loading ? 'Logging in...' : 'Log in →'}
             </button>
           </form>
-          <p className="auth-switch">No account yet? <Link to="/register">Sign up for free</Link></p>
+          <p className="auth-switch">No account yet? <Link to="/register">Sign up</Link></p>
         </div>
       </div>
     </div>
