@@ -17,10 +17,7 @@ export default function Login() {
     try {
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Sending as a JSON object to satisfy the Pydantic validator
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: form.email.trim().toLowerCase(),
           password: form.password
@@ -30,19 +27,21 @@ export default function Login() {
       const resData = await response.json();
 
       if (!response.ok) {
-        // Handle FastAPI detail objects to avoid [object Object]
-        let msg = 'Invalid email or password';
-        if (typeof resData.detail === 'string') {
-          msg = resData.detail;
-        } else if (Array.isArray(resData.detail)) {
-          msg = resData.detail[0].msg;
-        }
+        let msg = typeof resData.detail === 'string' ? resData.detail : 'Login failed';
         throw new Error(msg);
       }
 
       if (resData.access_token) {
+        // 1. Save the token
         localStorage.setItem('token', resData.access_token);
-        window.location.href = '/dashboard';
+        
+        // 2. If you have a setUser function passed as a prop, call it
+        if (typeof setUser === 'function') {
+          setUser(resData.user || { email: form.email });
+        }
+
+        // 3. Navigate to dashboard without a full page reload
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message);
