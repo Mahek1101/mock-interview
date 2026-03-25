@@ -15,27 +15,31 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const params = new URLSearchParams();
-      params.append('username', form.email.trim().toLowerCase());
-      params.append('password', form.password);
+      // Use FormData which is the most reliable for FastAPI OAuth2
+      const formData = new FormData();
+      formData.append('username', form.email.trim().toLowerCase());
+      formData.append('password', form.password);
 
       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params.toString(),
+        // DO NOT set Content-Type header when using FormData; 
+        // the browser will set it automatically with the correct boundary.
+        body: formData, 
       });
 
       const resData = await response.json();
 
       if (!response.ok) {
-        // FIX FOR [object Object]:
-        let msg = 'Invalid email or password';
+        // Fix for [object Object] - extract the human-readable message
+        let errorMessage = 'Invalid email or password';
         if (typeof resData.detail === 'string') {
-          msg = resData.detail;
+          errorMessage = resData.detail;
         } else if (Array.isArray(resData.detail)) {
-          msg = resData.detail[0].msg; // Takes the first error message from FastAPI
+          errorMessage = resData.detail[0].msg;
+        } else if (resData.detail?.message) {
+          errorMessage = resData.detail.message;
         }
-        throw new Error(msg);
+        throw new Error(errorMessage);
       }
 
       localStorage.setItem('token', resData.access_token);
