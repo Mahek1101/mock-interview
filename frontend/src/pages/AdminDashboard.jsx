@@ -10,14 +10,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          navigate('/login');
-          return;
-        }
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error("No token found");
 
-       const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
+      // The correct path based on your prefix="/auth" in auth.py
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -25,21 +23,26 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        // This will tell us if it's a 401 (Unauthenticated) or 403 (Not an Admin)
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}: Server rejected the admin request`);
+        throw new Error(errorData.detail || 'Failed to fetch users');
       }
 
       const data = await response.json();
-      // Ensure we handle the data whether it's an array or an object
-      const userList = Array.isArray(data) ? data : (data.users || []);
-      setUsers(userList);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      
+      // Your backend returns: { total_users: X, users: [...] }
+      // We need to set the state to the 'users' array specifically
+      if (data && data.users) {
+        setUsers(data.users);
+      } else {
+        setUsers([]);
       }
-    };
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchUsers();
   }, [navigate]);
