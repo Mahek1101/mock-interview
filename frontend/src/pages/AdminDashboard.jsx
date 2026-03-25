@@ -14,7 +14,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('token');
       
       // Fixed URL: Combined prefix "/auth" + path "/admin/users"
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users/', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
