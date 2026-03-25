@@ -32,7 +32,7 @@ export default function Login({ setUser }) {
       const resData = await response.json();
 
       if (!response.ok) {
-        // Handle complex error objects from FastAPI
+        // Handle complex error objects from FastAPI to avoid [object Object]
         const message = typeof resData.detail === 'string' 
           ? resData.detail 
           : (resData.detail?.[0]?.msg || 'Invalid email or password');
@@ -41,7 +41,7 @@ export default function Login({ setUser }) {
 
       if (resData.access_token) {
         localStorage.setItem('token', resData.access_token);
-        // Refresh the page to the dashboard to clear any stale state
+        // Using window.location to ensure the whole app state resets for the dashboard
         window.location.href = '/dashboard';
       }
     } catch (err) {
