@@ -54,13 +54,15 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
 def get_me(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "username": current_user.username, "email": current_user.email}
 
-@router.get("/admin/users/")
+@router.get("/admin/users")
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # 1. Verification
-    if current_user.email != "admin@gmail.com":
+    # This will show up in your Render Logs to help us debug
+    print(f"Admin access attempt by: {current_user.email}")
+    
+    # MUST MATCH THE EMAIL YOU ARE LOGGED IN WITH
+    if current_user.email != "patel@gmail.com" and current_user.email != "admin@gmail.com":
         raise HTTPException(status_code=403, detail="Admin privileges required")
     
-    # 2. Fetch and Clean Data
     users = db.query(User).all()
     return {
         "total_users": len(users), 
