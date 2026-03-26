@@ -156,7 +156,7 @@ export default function Dashboard({ user, logout }) {
 
     const fetchAdminStats = async () => {
       // ⚠️ Use the user object to check for admin access
-      if (user?.email?.toLowerCase() !== 'patel@gmail.com') return;
+      if (user?.email?.toLowerCase() !== 'admin@gmail.com') return;
       
       try {
         const token = localStorage.getItem('token');
@@ -189,7 +189,7 @@ export default function Dashboard({ user, logout }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
     
           {/* ADD THE ADMIN LINK HERE */}
-          {user && user.email === 'patel@gmail.com' && (
+          {user && user.email === 'admin@gmail.com' && (
             <button 
               onClick={() => navigate('/admin')} 
               className="dash-logout" 
@@ -207,7 +207,7 @@ export default function Dashboard({ user, logout }) {
       </header>
       <main className="dash-main">
 
-        {user?.email === 'patel@gmail.com' && adminStats && (
+        {user?.email === 'admin@gmail.com' && adminStats && (
           <div style={{ 
             background: '#1e293b', 
             padding: '20px', 
