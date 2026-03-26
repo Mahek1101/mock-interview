@@ -52,7 +52,7 @@ export default function Register() {
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="field">
               <label>Username</label>
-              <input name="username" type="text" value={form.username} onChange={handleChange} placeholder="johndoe" required />
+              <input name="username" type="text" value={form.username} onChange={handleChange} placeholder="example" required />
             </div>
             <div className="field">
               <label>Email</label>
