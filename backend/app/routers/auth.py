@@ -11,7 +11,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 @router.post("/register", status_code=201)
 def register(payload: UserCreate, db: Session = Depends(get_db)):
     clean_email = payload.email.strip().lower()
-    if db.query(User).filter(User.email == clean.email).first():
+    if db.query(User).filter(User.email == clean_email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(User).filter(User.username == payload.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
