@@ -80,7 +80,7 @@ function App() {
         } />
 
         <Route path="/admin" element={
-          user && user.email === 'patel@gmail.com' ? <AdminDashboard /> : <Navigate to="/dashboard" />
+          user && user.email === 'admin@gmail.com' ? <AdminDashboard /> : <Navigate to="/dashboard" />
         } />
         
         {/* Catch-all redirect */}
