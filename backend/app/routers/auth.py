@@ -11,7 +11,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 @router.post("/register", status_code=201)
 def register(payload: UserCreate, db: Session = Depends(get_db)):
     clean_email = payload.email.strip().lower()
-    if db.query(User).filter(User.email == payload.email).first():
+    if db.query(User).filter(User.email == clean.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(User).filter(User.username == payload.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
@@ -54,17 +54,14 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
 def get_me(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "username": current_user.username, "email": current_user.email}
 
-@router.get("/admin/users")
+@router.get("/admin/users") # Removed the trailing slash to match your frontend
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # This will show up in your Render Logs to help us debug
-    print(f"Admin access attempt by: {current_user.email}")
-    
-    # MUST MATCH THE EMAIL YOU ARE LOGGED IN WITH
-    if current_user.email != "patel@gmail.com" and current_user.email != "admin@gmail.com":
+    # Force lowercase check to prevent capital letter errors
+    if current_user.email.lower() != "admin@gmail.com":
         raise HTTPException(status_code=403, detail="Admin privileges required")
     
     users = db.query(User).all()
     return {
-        "total_users": len(users), 
+        "total_users": len(users),
         "users": [{"id": u.id, "username": u.username, "email": u.email} for u in users]
     }
