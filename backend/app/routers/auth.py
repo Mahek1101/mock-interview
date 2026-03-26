@@ -57,7 +57,7 @@ def get_me(current_user: User = Depends(get_current_user)):
 @router.get("/admin/users/")
 def get_all_users(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # 1. Verification
-    if current_user.email != "patel@gmail.com":
+    if current_user.email != "admin@gmail.com":
         raise HTTPException(status_code=403, detail="Admin privileges required")
     
     # 2. Fetch and Clean Data
