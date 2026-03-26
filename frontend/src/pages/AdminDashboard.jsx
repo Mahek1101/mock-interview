@@ -14,7 +14,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('token');
       
       // Fixed URL: Combined prefix "/auth" + path "/admin/users"
-      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users/', {
+      const response = await fetch('https://mock-interview-backend-d0i9.onrender.com/auth/admin/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -28,10 +28,12 @@ export default function AdminDashboard() {
 
       const data = await response.json();
       
-      // Your auth.py returns an object: {"total_users": X, "users": [...]}
-      // We must access data.users specifically
-      if (data && data.users) {
+      // Look specifically for the 'users' key in the backend response
+      if (data && data.users && Array.isArray(data.users)) {
         setUsers(data.users);
+      } else if (Array.isArray(data)) {
+        // Fallback in case your backend sends a straight array
+        setUsers(data);
       } else {
         setUsers([]);
       }
