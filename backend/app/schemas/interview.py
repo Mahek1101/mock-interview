@@ -29,3 +29,12 @@ class SessionOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    username: str
+    is_admin: bool = False
+
+    class Config:
+        from_attributes = True
