@@ -11,11 +11,12 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
-class UserOut(BaseModel):
+class UserResponse(BaseModel):
     id: int
     username: str
     email: str
-    created_at: datetime
+    is_admin: bool = False
+    created_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
